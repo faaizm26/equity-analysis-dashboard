@@ -176,11 +176,11 @@ buffer_bytes = BytesIO()
 
 with pd.ExcelWriter(buffer_bytes, engine="openpyxl") as writer:
     comps_table.to_excel(
-        writer, sheet_name=f"{ticker_input} Comparable Company Analysis", index=False)
+        writer, sheet_name=f"{ticker_input} CCA", index=False)
     key_financials.to_excel(
-        writer, sheet_name=f"{ticker_input} Key Financials", index=False)
+        writer, sheet_name=f"{ticker_input} Financials", index=False)
     quant_analysis.to_excel(
-        writer, sheet_name=f"{ticker_input} Quantitative Analysis", index=False)
+        writer, sheet_name=f"{ticker_input} Quant", index=False)
 
 excel_export = buffer_bytes.getvalue()
 
