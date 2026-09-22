@@ -41,22 +41,29 @@ The program utilizes the daily returns to compute annualized volatility and beta
 
 1. Clone this repository:
    
-   ```bash
+```bash
 git clone https://github.com/faaizm26/equity-analysis-dashboard.git
 cd equity-analysis-dashboard
+```
 
 2. Create virtual environment:
-   
+
+```bash
    python -m venv venv
 source venv/bin/activate
+```
 
 3. Install relevant Python packages:
-
+   
+```bash
    pip install streamlit yfinance pandas plotly openpyxl
+```
 
 4. Run the Streamlit app:
    
+   ```bash
    streamlit run app.py
+   ```
 
 ## Possible Improvements
 Some changes that would make this program more advanced and applicable to real-world markets include:
