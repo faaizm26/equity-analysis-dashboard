@@ -61,9 +61,9 @@ source venv/bin/activate
 
 4. Run the Streamlit app:
    
-   ```bash
-   streamlit run app.py
-   ```
+```bash
+streamlit run app.py
+```
 
 ## Possible Improvements
 Some changes that would make this program more advanced and applicable to real-world markets include:
