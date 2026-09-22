@@ -49,14 +49,14 @@ cd equity-analysis-dashboard
 2. Create virtual environment:
 
 ```bash
-   python -m venv venv
+python -m venv venv
 source venv/bin/activate
 ```
 
 3. Install relevant Python packages:
    
 ```bash
-   pip install streamlit yfinance pandas plotly openpyxl
+pip install streamlit yfinance pandas plotly openpyxl
 ```
 
 4. Run the Streamlit app:
