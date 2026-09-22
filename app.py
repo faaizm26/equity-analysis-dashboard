@@ -51,23 +51,30 @@ st.subheader("Key Financials")
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.metric("Market Cap", f"${market_cap/1e12:.2f}T")
+    st.metric("Market Cap",
+              f"${market_cap/1e12:.2f}T" if market_cap is not None else "N/A")
 with col2:
-    st.metric("Total Revenue", f"{total_revenue/1e9:.2f}B")
+    st.metric("Total Revenue",
+              f"{total_revenue/1e9:.2f}B" if total_revenue is not None else "N/A")
 with col3:
-    st.metric("Trailing P/E", f"{trailing_PE:.1f}x")
+    st.metric("Trailing P/E",
+              f"{trailing_PE:.1f}x" if trailing_PE is not None else "N/A")
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.metric("Forward P/E", f"{forward_PE:.1f}x")
+    st.metric("Forward P/E",
+              f"{forward_PE:.1f}x" if forward_PE is not None else "N/A")
 with col2:
-    st.metric("EV/EBITDA", f"{ev_to_ebitda:.1f}x")
+    st.metric(
+        "EV/EBITDA", f"{ev_to_ebitda:.1f}x" if ev_to_ebitda is not None else "N/A")
 with col3:
-    st.metric("Quarterly YoY Revenue Growth", f"{rev_growth:.1%}")
+    st.metric("Quarterly YoY Revenue Growth",
+              f"{rev_growth:.1%}" if rev_growth is not None else "N/A")
 
 if data.empty:
     st.error("The ticker was not recognized. Please enter a valid ticker.")
 else:
+    st.subheader(f"{ticker_input} Historical Price")
     st.dataframe(data)
     moving_50 = data["Close"].rolling(window=50).mean()
     moving_200 = data["Close"].rolling(window=200).mean()
@@ -78,64 +85,64 @@ else:
     fig.add_trace(go.Scatter(x=data.index, y=moving_50, name="50-Day MA"))
     fig.add_trace(go.Scatter(x=data.index, y=moving_200, name="200-Day MA"))
 
-    fig.update_layout(title=f"{ticker_input} Historical Price",
-                      xaxis_title="Date", yaxis_title="Price (USD)")
+    fig.update_layout(xaxis_title="Date", yaxis_title="Price (USD)")
     st.plotly_chart(fig)
 
 sp_500 = pd.read_csv(
     "constituents.csv")
 
-sub_industry = sp_500.loc[sp_500["Symbol"]
-                          == ticker_input, "GICS Sub-Industry"].iloc[0]
-comparable_comps = sp_500[sp_500["GICS Sub-Industry"] == sub_industry]
+if sp_500["Symbol"].isin([ticker_input]).any():
 
-final_comps = []
-final_metrics = []
-growth_diffs = []
-for symbol in comparable_comps["Symbol"]:
-    comparable_company = yf.Ticker(symbol)
-    comp_market_cap, comp_forward_PE, comp_trailing_PE, comp_total_revenue, comp_ev_to_ebitda, comp_rev_growth = metrics(
-        symbol)
-    comps_metrics = [comp_market_cap, comp_forward_PE, comp_trailing_PE,
-                     comp_total_revenue, comp_ev_to_ebitda, comp_rev_growth]
-    comps_size = cap_size(comp_market_cap)
-    if symbol != ticker_input and (company_size == comps_size or (market_cap*0.5) <= comp_market_cap <= (market_cap*3)):
-        growth_diff = abs(rev_growth - comp_rev_growth)
-        growth_diffs.append(growth_diff)
-        final_comps.append(symbol)
-        final_metrics.append(comps_metrics)
-closest_comps = (sorted(zip(final_comps, growth_diffs, final_metrics)))[:5]
+    sub_industry = sp_500.loc[sp_500["Symbol"]
+                              == ticker_input, "GICS Sub-Industry"].iloc[0]
+    comparable_comps = sp_500[sp_500["GICS Sub-Industry"] == sub_industry]
 
-peer_group = [comp[0] for comp in closest_comps]
-peer_group_growth = [comp[1] for comp in closest_comps]
-peer_group_metrics = [comp[2] for comp in closest_comps]
+    final_comps = []
+    final_metrics = []
+    growth_diffs = []
+    for symbol in comparable_comps["Symbol"]:
+        comparable_company = yf.Ticker(symbol)
+        comp_market_cap, comp_forward_PE, comp_trailing_PE, comp_total_revenue, comp_ev_to_ebitda, comp_rev_growth = metrics(
+            symbol)
+        comps_metrics = [comp_market_cap, comp_forward_PE, comp_trailing_PE,
+                         comp_total_revenue, comp_ev_to_ebitda, comp_rev_growth]
+        comps_size = cap_size(comp_market_cap)
+        if symbol != ticker_input and (company_size == comps_size or (market_cap*0.5) <= comp_market_cap <= (market_cap*3)):
+            growth_diff = abs(rev_growth - comp_rev_growth)
+            growth_diffs.append(growth_diff)
+            final_comps.append(symbol)
+            final_metrics.append(comps_metrics)
+    closest_comps = (sorted(zip(final_comps, growth_diffs, final_metrics)))[:5]
 
+    peer_group = [comp[0] for comp in closest_comps]
+    peer_group_growth = [comp[1] for comp in closest_comps]
+    peer_group_metrics = [comp[2] for comp in closest_comps]
 
-comps_table = pd.DataFrame(peer_group_metrics, columns=[
-                           "Market Cap", "Forward PE", "Trailing PE", "Total Revenue", "EV/EBITDA", "Quarterly YoY Revenue Growth"])
-comps_table.insert(0, "Company", peer_group)
-comps_table.index = comps_table.index + 1
+    comps_table = pd.DataFrame(peer_group_metrics, columns=[
+        "Market Cap", "Forward PE", "Trailing PE", "Total Revenue", "EV/EBITDA", "Quarterly YoY Revenue Growth"])
+    comps_table.insert(0, "Company", peer_group)
+    comps_table.index = comps_table.index + 1
 
-st.subheader("Comparable Company Analysis")
-st.caption(
-    "S&P 500 peers chosen based on sub-industry, market capitalization, and enterprise mutiple")
-st.dataframe(comps_table)
-peer_valuation = comps_table[["Forward PE", "Trailing PE", "EV/EBITDA"]]
-peer_median = peer_valuation.median()
+    st.subheader("Comparable Company Analysis")
+    st.caption(
+        "S&P 500 peers chosen based on sub-industry, market capitalization, and revenue growth")
+    st.dataframe(comps_table)
+    peer_valuation = comps_table[["Forward PE", "Trailing PE", "EV/EBITDA"]]
+    peer_median = peer_valuation.median()
 
-forward_PE_val = (forward_PE/peer_median["Forward PE"]) - 1
-trailing_PE_val = (trailing_PE/peer_median["Trailing PE"]) - 1
-ev_to_ebitda_val = (ev_to_ebitda/peer_median["EV/EBITDA"]) - 1
+    forward_PE_val = (forward_PE/peer_median["Forward PE"]) - 1
+    trailing_PE_val = (trailing_PE/peer_median["Trailing PE"]) - 1
+    ev_to_ebitda_val = (ev_to_ebitda/peer_median["EV/EBITDA"]) - 1
 
-st.subheader("Peer Group Valuation")
+    st.subheader("Peer Group Valuation")
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.metric("Forward PE Premium/Discount", f"{forward_PE_val:+.1%}")
-with col2:
-    st.metric("Trailing PE Premium/Discount", f"{trailing_PE_val:+.1%}")
-with col3:
-    st.metric("EV/EBITDA Premium/Discount", f"{ev_to_ebitda_val:+.1%}")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Forward PE Premium/Discount", f"{forward_PE_val:+.1%}")
+    with col2:
+        st.metric("Trailing PE Premium/Discount", f"{trailing_PE_val:+.1%}")
+    with col3:
+        st.metric("EV/EBITDA Premium/Discount", f"{ev_to_ebitda_val:+.1%}")
 
 returns = (data["Close"].pct_change()).dropna()
 annual_vol = returns.std()*sqrt(252)
@@ -156,7 +163,7 @@ total_market_return = (market_data["Close"].dropna()).iloc[-1] / \
 
 rel_perform = total_return - total_market_return
 
-st.subheader("Quantitative Analysis Metrics")
+st.subheader("Quantitative Metrics")
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
