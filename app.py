@@ -108,7 +108,10 @@ if sp_500["Symbol"].isin([ticker_input]).any():
                          comp_total_revenue, comp_ev_to_ebitda, comp_rev_growth]
         comps_size = cap_size(comp_market_cap)
         if symbol != ticker_input and (company_size == comps_size or (market_cap*0.5) <= comp_market_cap <= (market_cap*3)):
-            growth_diff = abs(rev_growth - comp_rev_growth)
+            if rev_growth is not None and comp_rev_growth is not None:
+                growth_diff = abs(rev_growth - comp_rev_growth)
+            else:
+                growth_diff = float("inf")
             growth_diffs.append(growth_diff)
             final_comps.append(symbol)
             final_metrics.append(comps_metrics)
