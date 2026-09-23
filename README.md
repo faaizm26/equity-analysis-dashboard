@@ -24,7 +24,7 @@ This dashboard is currently limited to companies in the S&P 500 only. Please not
 ## Methods
 
 ### Comparable Company Analysis:
-As part of the CCA, the program first chooses similar companies by selecting for the same GICS sub-industry. Then, narrows down peers by looking for companies with market capitalizations and revenue growth rates closest to the original company. Finally, it picks 5 top contenders and forms a peer group.
+The program utilizes a public online S&P 500 constituents dataset for this section. As part of the CCA, the program first chooses similar companies by selecting for the same GICS sub-industry. Then, narrows down peers by looking for companies with market capitalizations and revenue growth rates closest to the original company. Finally, it picks 5 top contenders and forms a peer group.
 
 ### Quantitative Metrics:
 The program utilizes the daily returns to compute annualized volatility and beta to analyze risk relative to the market. It also calculates maximum drawdown and relative performance (compared to S&P 500). 
